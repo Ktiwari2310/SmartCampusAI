@@ -40,3 +40,34 @@
 .read-the-docs {
   color: #888;
 }
+
+.nav-link {
+  text-decoration: none;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-weight: 500;
+  color: #444;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  transform: translateY(-2px);
+}
+
+.nav-link.active {
+  background-color: #bbdefb;
+  color: #0d47a1;
+}
+
+.admin-btn {
+  background-color: #1976d2;
+  color: white !important;
+}
+
+.admin-btn:hover {
+  background-color: #125ea7;
+  color: white !important;
+}
+
