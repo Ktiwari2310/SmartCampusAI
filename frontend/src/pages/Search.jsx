@@ -1,150 +1,211 @@
-import { useState } from "react";
-import { searchResources } from "../Api";
+import { useState, useEffect } from "react";
+import resourcesData from "../data/resourcesData";
 
 function Search() {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [selectedType, setSelectedType] = useState("All");
+  const [results, setResults] = useState(resourcesData);
 
-  const handleSearch = async () => {
-    setLoading(true);
+  // 🔥 Main Filtering Logic
+  useEffect(() => {
+    let filtered = resourcesData;
 
-    const data = await searchResources(query);
+    // Filter by search text (title + summary)
+    if (query.trim()) {
+      filtered = filtered.filter(
+        (item) =>
+          item.title.toLowerCase().includes(query.toLowerCase()) ||
+          item.summary.toLowerCase().includes(query.toLowerCase())
+      );
+    }
 
-    // simulate AI delay
-    setTimeout(() => {
-      setResults(data);
-      setLoading(false);
-    }, 600);
+    // Filter by fileType
+    if (selectedType !== "All") {
+      filtered = filtered.filter(
+        (item) => item.fileType === selectedType
+      );
+    }
+
+    setResults(filtered);
+  }, [query, selectedType]);
+
+  // 🎨 Badge Color Logic
+  const getBadgeStyle = (fileType) => {
+    switch (fileType) {
+      case "Research Paper":
+        return { backgroundColor: "#1976d2" };
+      case "Lecture Notes":
+        return { backgroundColor: "#43a047" };
+      case "Case Study":
+        return { backgroundColor: "#f57c00" };
+      default:
+        return { backgroundColor: "#555" };
+    }
   };
 
   return (
-    <div style={styles.container}>
-      <h2>Search Resources</h2>
+    <div style={styles.wrapper}>
+      
+      {/* SIDEBAR */}
+      <div style={styles.sidebar}>
+        <h3>Filters</h3>
 
-      <div style={styles.searchBox}>
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search notes, PDFs, research papers..."
-          style={styles.input}
-        />
-        <button onClick={handleSearch} style={styles.button}>
-          Search
-        </button>
+        <div style={styles.filterGroup}>
+          <p style={styles.filterTitle}>File Type</p>
+
+          {["All", "Research Paper", "Lecture Notes", "Case Study"].map(
+            (type) => (
+              <label key={type} style={styles.filterItem}>
+                <input
+                  type="radio"
+                  name="fileType"
+                  value={type}
+                  checked={selectedType === type}
+                  onChange={(e) => setSelectedType(e.target.value)}
+                  style={{ accentColor: "#1976d2" }}
+                />
+                {type}
+              </label>
+            )
+          )}
+        </div>
       </div>
 
-      {loading && <p style={styles.loading}>🔎 AI is analyzing...</p>}
+      {/* MAIN CONTENT */}
+      <div style={styles.content}>
+        <h2>Search Resources</h2>
 
-      {!loading && results.length === 0 && query && (
-        <p style={styles.empty}>No results found.</p>
-      )}
+        <div style={styles.searchBox}>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search notes, PDFs, research papers..."
+            style={styles.input}
+          />
+        </div>
 
-      <div style={styles.results}>
-        {results.map((item, index) => (
-          <div key={index} style={styles.card}>
-            <div style={styles.cardHeader}>
-              <h3>{item.title}</h3>
-              <span style={styles.score}>
-                {Math.round(item.relevanceScore * 100)}%
-              </span>
-            </div>
+        <p style={styles.resultCount}>
+          Showing {results.length} results
+        </p>
 
-            <p style={styles.summary}>{item.summary}</p>
+        <div style={styles.results}>
+          {results.length === 0 ? (
+            <p>No resources found.</p>
+          ) : (
+            results.map((item) => (
+              <div key={item.id} style={styles.card}>
+                
+                {/* FILE TYPE BADGE */}
+                <div style={styles.badgeWrapper}>
+                  <span
+                    style={{
+                      ...styles.badge,
+                      ...getBadgeStyle(item.fileType)
+                    }}
+                  >
+                    {item.fileType}
+                  </span>
+                </div>
 
-            <div style={styles.footer}>
-              <span style={styles.fileType}>{item.fileType}</span>
-              <button style={styles.viewBtn}>View</button>
-            </div>
-          </div>
-        ))}
+                <h3 style={styles.title}>{item.title}</h3>
+                <p style={styles.summary}>{item.summary}</p>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
 const styles = {
-  container: {
-    padding: "80px 40px",
-    backgroundColor: "#f9fbff",
+  wrapper: {
+    display: "flex",
+    padding: "40px",
+    background: "#f5f8ff",
     minHeight: "100vh"
   },
-  searchBox: {
+
+  sidebar: {
+    width: "250px",
+    background: "white",
+    padding: "25px",
+    borderRadius: "15px",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.05)",
+    textAlign: "left"
+  },
+
+  filterGroup: {
+    marginTop: "20px",
     display: "flex",
-    justifyContent: "center",
+    flexDirection: "column",
+    gap: "12px"
+  },
+
+  filterTitle: {
+    fontWeight: "600"
+  },
+
+  filterItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    cursor: "pointer"
+  },
+
+  content: {
+    flex: 1,
+    marginLeft: "40px"
+  },
+
+  searchBox: {
     marginTop: "20px"
   },
+
   input: {
+    width: "100%",
     padding: "14px",
-    width: "400px",
-    borderRadius: "10px 0 0 10px",
+    borderRadius: "10px",
     border: "1px solid #ccc"
   },
-  button: {
-    padding: "14px 20px",
-    borderRadius: "0 10px 10px 0",
-    border: "none",
-    backgroundColor: "#1976d2",
-    color: "#fff",
-    cursor: "pointer"
-  },
-  loading: {
-    textAlign: "center",
+
+  resultCount: {
     marginTop: "20px",
-    color: "#1976d2"
+    color: "#555",
+    fontWeight: "500"
   },
-  empty: {
-    textAlign: "center",
-    marginTop: "20px",
-    color: "#777"
-  },
+
   results: {
-    marginTop: "40px",
+    marginTop: "30px",
     display: "grid",
-    gap: "25px"
+    gap: "20px"
   },
+
   card: {
-    backgroundColor: "#ffffff",
+    background: "white",
     padding: "25px",
-    borderRadius: "16px",
-    boxShadow: "0 10px 25px rgba(0,0,0,0.05)",
-    transition: "transform 0.2s ease"
+    borderRadius: "15px",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.05)"
   },
-  cardHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center"
+
+  badgeWrapper: {
+    marginBottom: "10px"
   },
-  score: {
-    backgroundColor: "#e3f2fd",
-    color: "#1976d2",
-    padding: "6px 12px",
+
+  badge: {
+    color: "white",
+    padding: "5px 12px",
     borderRadius: "20px",
-    fontSize: "14px"
+    fontSize: "12px"
   },
+
+  title: {
+    marginTop: "10px"
+  },
+
   summary: {
-    marginTop: "15px",
+    marginTop: "8px",
     color: "#555"
-  },
-  footer: {
-    marginTop: "20px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center"
-  },
-  fileType: {
-    backgroundColor: "#f1f1f1",
-    padding: "6px 12px",
-    borderRadius: "8px",
-    fontSize: "13px"
-  },
-  viewBtn: {
-    backgroundColor: "#1976d2",
-    color: "#fff",
-    border: "none",
-    padding: "8px 16px",
-    borderRadius: "8px",
-    cursor: "pointer"
   }
 };
 

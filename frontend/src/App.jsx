@@ -5,6 +5,8 @@ import Features from "./pages/Features";
 import HowItWorks from "./pages/HowItWorks";
 import Search from "./pages/Search";
 import Admin from "./pages/Admin";
+import Resources from "./pages/ResourceList";
+
 
 function App() {
   return (
@@ -15,7 +17,9 @@ function App() {
         <Route path="/features" element={<Features />} />
         <Route path="/how-it-works" element={<HowItWorks />} />
         <Route path="/search" element={<Search />} />
+        <Route path="/resources" element={<Resources />} />
         <Route path="/admin" element={<Admin />} />
+        
       </Routes>
     </>
   );
