@@ -1,7 +1,40 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 function Home() {
   const navigate = useNavigate();
+  const [activeIndex, setActiveIndex] = useState(null);
+
+  const features = [
+    {
+      title: "Semantic Search",
+      icon: "🔍",
+      description:
+        "Understands the meaning behind your query instead of just matching keywords. Provides context-aware and intelligent results."
+    },
+    {
+      title: "AI Summarization",
+      icon: "🧠",
+      description:
+        "Automatically generates concise summaries from long academic documents to save students valuable time."
+    },
+    {
+      title: "Multi-Modal Support",
+      icon: "📄",
+      description:
+        "Supports PDFs, lecture notes, research papers, presentations, and multiple file formats in one platform."
+    },
+    {
+      title: "Personalized Recommendations",
+      icon: "🎯",
+      description:
+        "Suggests relevant academic resources based on your department and previous search activity."
+    }
+  ];
+
+  const handleFeatureClick = (index) => {
+    setActiveIndex(activeIndex === index ? null : index);
+  };
 
   return (
     <div>
@@ -66,11 +99,53 @@ function Home() {
               <p>Semantic Search Engine</p>
             </div>
 
-            
             <div style={styles.stepCard}>
               <span style={styles.icon}>⚡</span>
               <p>Instant Smart Results</p>
             </div>
+          </div>
+        </div>
+
+        {/* FEATURES SECTION */}
+        <div style={styles.featuresSection}>
+          <h2 style={styles.featuresHeading}>Key Features</h2>
+
+          <div style={styles.featuresGrid}>
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                style={{
+                  ...styles.featureCard,
+                  boxShadow:
+                    activeIndex === index
+                      ? "0 15px 35px rgba(0,0,0,0.1)"
+                      : "0 10px 25px rgba(0,0,0,0.05)"
+                }}
+                onClick={() => handleFeatureClick(index)}
+              >
+                <div style={styles.featureHeader}>
+                  <h3>
+                    {feature.icon} {feature.title}
+                  </h3>
+
+                  <span style={styles.arrow}>
+                    {activeIndex === index ? "▲" : "▼"}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    maxHeight: activeIndex === index ? "200px" : "0px",
+                    overflow: "hidden",
+                    transition: "all 0.3s ease"
+                  }}
+                >
+                  <p style={styles.featureDescription}>
+                    {feature.description}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -95,7 +170,6 @@ function Home() {
             </p>
           </div>
 
-         
           <div>
             <h4>Contact</h4>
             <p style={styles.footerText}>
@@ -137,12 +211,14 @@ const styles = {
   searchBox: {
     marginTop: "30px",
     display: "flex",
-    justifyContent: "center"
+    justifyContent: "center",
+    flexWrap: "wrap"
   },
 
   input: {
     padding: "14px",
     width: "400px",
+    maxWidth: "90%",
     borderRadius: "10px 0 0 10px",
     border: "1px solid #ccc"
   },
@@ -195,6 +271,52 @@ const styles = {
     marginBottom: "10px"
   },
 
+  featuresSection: {
+    marginTop: "100px"
+  },
+
+  featuresHeading: {
+    fontSize: "28px",
+    marginBottom: "50px"
+  },
+
+  featuresGrid: {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+  gap: "30px",
+  maxWidth: "1100px",
+  margin: "auto",
+  alignItems: "start"   // ⭐ THIS FIXES THE WIDTH EXPANSION ISSUE
+},
+
+
+  featureCard: {
+    padding: "30px",
+    borderRadius: "18px",
+    backgroundColor: "#ffffff",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    textAlign: "left",
+    minHeight: "120px"
+  },
+
+  featureHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+
+  arrow: {
+    fontSize: "14px",
+    color: "#1976d2"
+  },
+
+  featureDescription: {
+    marginTop: "15px",
+    color: "#444",
+    lineHeight: "1.6"
+  },
+
   whySection: {
     padding: "100px 40px",
     textAlign: "center",
@@ -227,13 +349,6 @@ const styles = {
 
   footerText: {
     color: "#555",
-    marginTop: "8px",
-    fontSize: "14px"
-  },
-
-  link: {
-    cursor: "pointer",
-    color: "#1976d2",
     marginTop: "8px",
     fontSize: "14px"
   },
