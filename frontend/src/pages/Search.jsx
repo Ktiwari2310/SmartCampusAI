@@ -6,7 +6,7 @@ function Search() {
   const [selectedType, setSelectedType] = useState("All");
   const [results, setResults] = useState(resourcesData);
 
-  // 🔥 Main Filtering Logic
+  
   useEffect(() => {
     let filtered = resourcesData;
 
@@ -29,7 +29,7 @@ function Search() {
     setResults(filtered);
   }, [query, selectedType]);
 
-  // 🎨 Badge Color Logic
+ 
   const getBadgeStyle = (fileType) => {
     switch (fileType) {
       case "Research Paper":
