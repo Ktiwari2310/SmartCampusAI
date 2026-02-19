@@ -18,9 +18,14 @@ function Navbar() {
         <NavLink to="/search" className="nav-link">
           Search
         </NavLink>
+        <NavLink to="/resources" className="nav-link">
+          Resources
+        </NavLink>
         <NavLink to="/admin" className="nav-link admin-btn">
           Admin
         </NavLink>
+        
+        
       </div>
     </nav>
   );
