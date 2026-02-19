@@ -4,37 +4,52 @@ function Admin() {
   const [form, setForm] = useState({
     title: "",
     summary: "",
-    fileType: ""
+    fileType: "PDF Document",
+    file: null
   });
 
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    // mock upload
-    console.log("Uploaded:", form);
+  const data = new FormData();
+  data.append("title", form.title);
+  data.append("summary", form.summary);
+  data.append("fileType", form.fileType);
+  data.append("file", form.file);
+
+  try {
+    const response = await fetch("http://localhost:5000/upload", {
+      method: "POST",
+      body: data
+    });
+
+    const result = await response.json();
+    console.log(result);
 
     setSuccess(true);
+  } catch (error) {
+    console.error("Upload failed:", error);
+  }
+};
 
-    setTimeout(() => {
-      setSuccess(false);
-      setForm({ title: "", summary: "", fileType: "" });
-    }, 2000);
-  };
 
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h2>Admin Upload Panel</h2>
+        <div style={styles.iconCircle}>📄</div>
+
+        <h2 style={styles.heading}>Admin Upload Panel</h2>
         <p style={styles.subtitle}>
-          Upload academic resources to Smart Campus AI
+          Upload academic resources to the Smart Campus AI repository
         </p>
 
         <form onSubmit={handleSubmit} style={styles.form}>
+          <label style={styles.label}>Resource Title</label>
           <input
             type="text"
-            placeholder="Resource Title"
+            placeholder="e.g. Introduction to Quantum Physics"
             value={form.title}
             required
             onChange={(e) =>
@@ -43,8 +58,9 @@ function Admin() {
             style={styles.input}
           />
 
+          <label style={styles.label}>Short Summary</label>
           <textarea
-            placeholder="Short Summary"
+            placeholder="Provide a brief overview of the academic content..."
             value={form.summary}
             required
             onChange={(e) =>
@@ -53,23 +69,59 @@ function Admin() {
             style={styles.textarea}
           />
 
+          <label style={styles.label}>File Type</label>
           <select
             value={form.fileType}
-            required
             onChange={(e) =>
               setForm({ ...form, fileType: e.target.value })
             }
             style={styles.select}
           >
-            <option value="">Select File Type</option>
-            <option value="PDF">PDF</option>
-            <option value="Notes">Notes</option>
-            <option value="Research Paper">Research Paper</option>
-            <option value="Presentation">Presentation</option>
+            <option>PDF Document</option>
+            <option>Notes</option>
+            <option>Research Paper</option>
+            <option>Presentation</option>
           </select>
 
+          <label style={styles.label}>File Attachment</label>
+
+          <div style={styles.uploadBox}>
+  <input
+    type="file"
+    accept=".pdf,.pptx,.docx"
+    onChange={(e) =>
+      setForm({ ...form, file: e.target.files[0] })
+    }
+    style={styles.fileInput}
+  />
+
+  <div>
+    <div style={styles.uploadIcon}>☁️</div>
+
+    {form.file ? (
+      <div>
+        <p style={{ margin: "8px 0", fontWeight: "500" }}>
+          {form.file.name}
+        </p>
+        <small style={{ color: "#777" }}>
+          {(form.file.size / 1024).toFixed(2)} KB
+        </small>
+      </div>
+    ) : (
+      <p style={{ margin: "8px 0" }}>
+        Click to browse or drag and drop
+      </p>
+    )}
+
+    <small style={{ color: "#777" }}>
+      Maximum file size: 50MB (PDF, PPTX, DOCX)
+    </small>
+  </div>
+</div>
+
+
           <button type="submit" style={styles.button}>
-            Upload Resource
+            ⬆ Upload Resource
           </button>
 
           {success && (
@@ -78,6 +130,10 @@ function Admin() {
             </p>
           )}
         </form>
+
+        <div style={styles.footerText}>
+          AUTHORIZED ADMIN ACCESS ONLY
+        </div>
       </div>
     </div>
   );
@@ -85,28 +141,48 @@ function Admin() {
 
 const styles = {
   container: {
+    minHeight: "100vh",
+    backgroundColor: "#f4f8ff",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    minHeight: "90vh",
-    backgroundColor: "#f4f8ff",
     padding: "40px"
   },
   card: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#fff",
     padding: "40px",
     borderRadius: "20px",
-    boxShadow: "0 15px 40px rgba(0,0,0,0.08)",
-    width: "450px"
+    boxShadow: "0 20px 50px rgba(0,0,0,0.08)",
+    width: "480px",
+    textAlign: "center"
+  },
+  iconCircle: {
+    width: "60px",
+    height: "60px",
+    borderRadius: "50%",
+    backgroundColor: "#e3f2fd",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "28px",
+    margin: "0 auto 20px auto"
+  },
+  heading: {
+    marginBottom: "8px"
   },
   subtitle: {
-    marginBottom: "25px",
-    color: "#666"
+    color: "#666",
+    marginBottom: "30px"
   },
   form: {
     display: "flex",
     flexDirection: "column",
-    gap: "18px"
+    gap: "15px",
+    textAlign: "left"
+  },
+  label: {
+    fontSize: "14px",
+    fontWeight: "500"
   },
   input: {
     padding: "12px",
@@ -125,19 +201,48 @@ const styles = {
     borderRadius: "10px",
     border: "1px solid #ddd"
   },
+  uploadBox: {
+    position: "relative",
+    border: "2px dashed #cfd8dc",
+    borderRadius: "15px",
+    padding: "30px",
+    textAlign: "center",
+    cursor: "pointer",
+    backgroundColor: "#fafcff"
+  },
+  fileInput: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    opacity: 0,
+    cursor: "pointer",
+    top: 0,
+    left: 0
+  },
+  uploadIcon: {
+    fontSize: "28px"
+  },
   button: {
-    padding: "12px",
-    borderRadius: "10px",
+    marginTop: "15px",
+    padding: "14px",
+    borderRadius: "12px",
     border: "none",
     backgroundColor: "#1976d2",
     color: "#fff",
+    fontWeight: "600",
     cursor: "pointer",
-    fontWeight: "500"
+    fontSize: "16px"
   },
   success: {
     marginTop: "10px",
     color: "green",
     fontWeight: "500"
+  },
+  footerText: {
+    marginTop: "25px",
+    fontSize: "12px",
+    letterSpacing: "1px",
+    color: "#888"
   }
 };
 
