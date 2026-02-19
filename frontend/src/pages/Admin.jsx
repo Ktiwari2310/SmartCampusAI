@@ -1,6 +1,13 @@
 import { useState } from "react";
 
 function Admin() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const [credentials, setCredentials] = useState({
+    email: "",
+    password: ""
+  });
+
   const [form, setForm] = useState({
     title: "",
     summary: "",
@@ -10,126 +17,177 @@ function Admin() {
 
   const [success, setSuccess] = useState(false);
 
+  // 🔐 Login Handler
+  const handleLogin = (e) => {
+    e.preventDefault();
+
+    if (
+      credentials.email === "admin@smartcampus.ai" &&
+      credentials.password === "admin123"
+    ) {
+      setIsLoggedIn(true);
+    } else {
+      alert("Invalid Credentials");
+    }
+  };
+
+  // 📤 Upload Handler
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const data = new FormData();
-  data.append("title", form.title);
-  data.append("summary", form.summary);
-  data.append("fileType", form.fileType);
-  data.append("file", form.file);
+    const data = new FormData();
+    data.append("title", form.title);
+    data.append("summary", form.summary);
+    data.append("fileType", form.fileType);
+    data.append("file", form.file);
 
-  try {
-    const response = await fetch("http://localhost:5000/upload", {
-      method: "POST",
-      body: data
-    });
+    try {
+      const response = await fetch("http://localhost:5000/upload", {
+        method: "POST",
+        body: data
+      });
 
-    const result = await response.json();
-    console.log(result);
+      const result = await response.json();
+      console.log(result);
 
-    setSuccess(true);
-  } catch (error) {
-    console.error("Upload failed:", error);
-  }
-};
-
+      setSuccess(true);
+    } catch (error) {
+      console.error("Upload failed:", error);
+    }
+  };
 
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <div style={styles.iconCircle}>📄</div>
 
-        <h2 style={styles.heading}>Admin Upload Panel</h2>
-        <p style={styles.subtitle}>
-          Upload academic resources to the Smart Campus AI repository
-        </p>
+        {/* 🔐 LOGIN VIEW */}
+        {!isLoggedIn ? (
+          <>
+            <div style={styles.iconCircle}>🔐</div>
+            <h2 style={styles.heading}>Admin Login</h2>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <label style={styles.label}>Resource Title</label>
-          <input
-            type="text"
-            placeholder="e.g. Introduction to Quantum Physics"
-            value={form.title}
-            required
-            onChange={(e) =>
-              setForm({ ...form, title: e.target.value })
-            }
-            style={styles.input}
-          />
+            <form onSubmit={handleLogin} style={styles.form}>
+              <label style={styles.label}>Admin Email</label>
+              <input
+                type="email"
+                required
+                value={credentials.email}
+                onChange={(e) =>
+                  setCredentials({ ...credentials, email: e.target.value })
+                }
+                style={styles.input}
+              />
 
-          <label style={styles.label}>Short Summary</label>
-          <textarea
-            placeholder="Provide a brief overview of the academic content..."
-            value={form.summary}
-            required
-            onChange={(e) =>
-              setForm({ ...form, summary: e.target.value })
-            }
-            style={styles.textarea}
-          />
+              <label style={styles.label}>Password</label>
+              <input
+                type="password"
+                required
+                value={credentials.password}
+                onChange={(e) =>
+                  setCredentials({ ...credentials, password: e.target.value })
+                }
+                style={styles.input}
+              />
 
-          <label style={styles.label}>File Type</label>
-          <select
-            value={form.fileType}
-            onChange={(e) =>
-              setForm({ ...form, fileType: e.target.value })
-            }
-            style={styles.select}
-          >
-            <option>PDF Document</option>
-            <option>Notes</option>
-            <option>Research Paper</option>
-            <option>Presentation</option>
-          </select>
+              <button type="submit" style={styles.button}>
+                Login
+              </button>
+            </form>
+          </>
+        ) : (
+          <>
+            {/* 📄 UPLOAD PANEL */}
+            <div style={styles.iconCircle}>📄</div>
 
-          <label style={styles.label}>File Attachment</label>
-
-          <div style={styles.uploadBox}>
-  <input
-    type="file"
-    accept=".pdf,.pptx,.docx"
-    onChange={(e) =>
-      setForm({ ...form, file: e.target.files[0] })
-    }
-    style={styles.fileInput}
-  />
-
-  <div>
-    <div style={styles.uploadIcon}>☁️</div>
-
-    {form.file ? (
-      <div>
-        <p style={{ margin: "8px 0", fontWeight: "500" }}>
-          {form.file.name}
-        </p>
-        <small style={{ color: "#777" }}>
-          {(form.file.size / 1024).toFixed(2)} KB
-        </small>
-      </div>
-    ) : (
-      <p style={{ margin: "8px 0" }}>
-        Click to browse or drag and drop
-      </p>
-    )}
-
-    <small style={{ color: "#777" }}>
-      Maximum file size: 50MB (PDF, PPTX, DOCX)
-    </small>
-  </div>
-</div>
-
-
-          <button type="submit" style={styles.button}>
-            ⬆ Upload Resource
-          </button>
-
-          {success && (
-            <p style={styles.success}>
-              ✅ Resource Uploaded Successfully!
+            <h2 style={styles.heading}>Admin Upload Panel</h2>
+            <p style={styles.subtitle}>
+              Upload academic resources to the Smart Campus AI repository
             </p>
-          )}
-        </form>
+
+            <form onSubmit={handleSubmit} style={styles.form}>
+              <label style={styles.label}>Resource Title</label>
+              <input
+                type="text"
+                required
+                value={form.title}
+                onChange={(e) =>
+                  setForm({ ...form, title: e.target.value })
+                }
+                style={styles.input}
+              />
+
+              <label style={styles.label}>Short Summary</label>
+              <textarea
+                required
+                value={form.summary}
+                onChange={(e) =>
+                  setForm({ ...form, summary: e.target.value })
+                }
+                style={styles.textarea}
+              />
+
+              <label style={styles.label}>File Type</label>
+              <select
+                value={form.fileType}
+                onChange={(e) =>
+                  setForm({ ...form, fileType: e.target.value })
+                }
+                style={styles.select}
+              >
+                <option>PDF Document</option>
+                <option>Notes</option>
+                <option>Research Paper</option>
+                <option>Presentation</option>
+              </select>
+
+              <label style={styles.label}>File Attachment</label>
+
+              <div style={styles.uploadBox}>
+                <input
+                  type="file"
+                  accept=".pdf,.pptx,.docx"
+                  onChange={(e) =>
+                    setForm({ ...form, file: e.target.files[0] })
+                  }
+                  style={styles.fileInput}
+                />
+
+                <div>
+                  <div style={styles.uploadIcon}>☁️</div>
+
+                  {form.file ? (
+                    <div>
+                      <p style={{ margin: "8px 0", fontWeight: "500" }}>
+                        {form.file.name}
+                      </p>
+                      <small style={{ color: "#777" }}>
+                        {(form.file.size / 1024).toFixed(2)} KB
+                      </small>
+                    </div>
+                  ) : (
+                    <p style={{ margin: "8px 0" }}>
+                      Click to browse or drag and drop
+                    </p>
+                  )}
+
+                  <small style={{ color: "#777" }}>
+                    Maximum file size: 50MB
+                  </small>
+                </div>
+              </div>
+
+              <button type="submit" style={styles.button}>
+                ⬆ Upload Resource
+              </button>
+
+              {success && (
+                <p style={styles.success}>
+                  ✅ Resource Uploaded Successfully!
+                </p>
+              )}
+            </form>
+          </>
+        )}
 
         <div style={styles.footerText}>
           AUTHORIZED ADMIN ACCESS ONLY
@@ -138,6 +196,7 @@ function Admin() {
     </div>
   );
 }
+
 
 const styles = {
   container: {
